@@ -1,0 +1,14 @@
+---How to run---
+
+Roomba terminal
+
+ssh root@192.168.1.10
+rtlab
+python Lab01.py /dev/ttyS1
+
+Other terminal
+scp *.py root@192.168.1.10:/home/root/jon
+
+--- other info ---
+sensor data:
+  'user-analog-input' is sonar distance

@@ -24,15 +24,6 @@ class Rtbot(Create):
 #   some code
 #=============================================================
 
-# ssh 192.168.1.10
-# scp *.py root@192.168.1.10:/home/root/jon
-# python Lab01.py /dev/ttyS1
-
-# 'user-analog-input' is sonar distance
-
-# if any of the conditions are met, stop driving
-# 	conditions = { 'distance': distance, 'sonar': sonar }
-
 	# Drive forward safely
 	def SafeDrive(self, velocity, radius, conditions):
 		print 'Driving'
@@ -40,9 +31,9 @@ class Rtbot(Create):
 		total_distance = 0
 		try:
 			while True:
-				print 'check sensors'
 				self.sensors.GetAll()
 				total_distance += self.sensors.data['distance']
+				conditions['total distance'] = total_distance
 				if self.ShouldStopDriving(conditions):
 					print 'Stopping'
 					self.Stop()
@@ -59,8 +50,7 @@ class Rtbot(Create):
 			return True
 
 		# distance traveled
-		if 'distance' in conditions and total_distance >= conditions['distance']:
-			total_distance = 0
+		if 'distance' in conditions and conditions['total distance'] >= conditions['distance']:
 			print 'distance {0} reached'.format(conditions['distance'])
 			return True
 
