@@ -8,6 +8,11 @@ import time
 #=============================================================
 # define the Rtbot class to init and start itself
 class Rtbot(Create):
+
+  distance_traveled = 0
+  degrees_rotated = 0
+  stop_cases = ['bump-left','bump-right','wheel-drop-caster','wheel-drop-left','wheel-drop-right','cliff-right','cliff-front-right','cliff-front-left','cliff-left']
+
 	def __init__(self, tty='/dev/ttyUSB0'):
 		super(Create, self).__init__(tty)
 		self.sci.AddOpcodes(CREATE_OPCODES)
@@ -24,44 +29,51 @@ class Rtbot(Create):
 #   some code
 #=============================================================
 
-	# Drive forward safely
-	def SafeDrive(self, velocity, radius, conditions):
-		print 'Driving'
+	# Drive safely based on a set of conditions
+	def SafeDrive(self, conditions):
+    velocity = conditions['velocity'] or VELOCITY_SLOW
+    radius = conditions['radius'] or RADIUS_STRAIGHT
 		self.Drive(velocity, radius)
-		total_distance = 0
 		try:
-			while True:
+      distance_traveled = 0
+      degrees_rotated = 0
+      keep_driving, stop_reason = self.ShouldKeepDriving(conditions)
+			while keep_driving:
 				self.sensors.GetAll()
-				total_distance += self.sensors.data['distance']
-				conditions['total distance'] = total_distance
-				if self.ShouldStopDriving(conditions):
-					print 'Stopping'
-					self.Stop()
-					break
+				distance_traveled += abs(self.sensors.data['distance']) # in case we're going backwards we get the magnitude of distance traveled
+        degrees_rotated += abs(self.sensors.data['angle'])
+        keep_driving, stop_reason = self.ShouldKeepDriving(conditions)
 		except Exception as exception:
+      stop_reason = 'exception'
 			print exception
-			self.Stop()
+    finally:
+      print 'Stopping'
+      self.Stop()
+    return stop_reason
 
-	# Check if the robot should stop based on current sensor conditions
-	def ShouldStopDriving(self, conditions):
-		# bump
-		if self.sensors.GetBump():
-			print 'bump'
-			return True
-
-		# distance traveled
-		if 'distance' in conditions and conditions['total distance'] >= conditions['distance']:
-			print 'distance {0} reached'.format(conditions['distance'])
-			return True
+	# Check if the robot should keep driving based on current sensor conditions
+    # What if we're just turning in place? Should we only check sonar and distance traveled if we are moving forward?
+	def ShouldKeepDriving(self, conditions):
+    # bumps, wheel drops, cliffs
+    for stop_case in stop_cases:
+      if self.sensors.data[stop_case]:
+  			print stop_case
+  			return False, stop_case
 
 		# sonar
-		if 'sonar' in conditions and self.sensors.data['sonar'] < conditions['sonar']:
-			print '{0} {1}'.format(self.sensors.data['sonar'], conditions['sonar'])
-			return True
+		if 'sonar' in conditions and self.sensors.data['user-analog-input'] < conditions['sonar']:
+			print 'Sonar {0} {1}'.format(self.sensors.data['user-analog-input'], conditions['sonar'])
+			return False, 'sonar'
 
-		# cliff
+		# distance traveled
+		if 'distance' in conditions and distance_traveled >= conditions['distance']:
+			print 'Traveled {0}'.format(distance_traveled)
+			return False, 'distance'
 
-		# wheel drop
+    # angle
+		if 'angle' in conditions and degrees_rotated >= conditions['angle']:
+			print 'Rotated {0}'.format(degrees_rotated)
+			return False, 'angle'
 
-		# finally
-		return False
+		# Keep Driving
+		return True, 'none'

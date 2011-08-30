@@ -9,6 +9,25 @@ python Lab01.py /dev/ttyS1
 Other terminal
 scp *.py root@192.168.1.10:/home/root/jon
 
---- other info ---
-sensor data:
-  'user-analog-input' is sonar distance
+
+Driving conditions
+
+* velocity
+   - not set will drive at VELOCITY_SLOW
+* radius
+   - not set will drive RADIUS_STRAIGHT
+* angle
+   - drives until rotated the given number of degrees and stops
+   - not set will drive until another stop condition is met
+* distance
+   - drives the given distance and stops
+   - not set will drive until another stop condition is met
+* sonar
+   - drives until a given distance from the wall and stops
+   - not set will drive until another stop condition is met
+
+Other Stopping conditions
+
+* Bump into a wall
+* Begin to drive forward off a cliff
+* Front Wheel is no longer touching the ground

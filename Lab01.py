@@ -16,8 +16,8 @@ def main():
 	global robot
 	robot = Rtbot(sys.argv[1])
 	robot.start()
- 	conditions = {}
-	robot.SafeDrive(500, 200, conditions)
+ 	conditions = {'velocity':500, 'radius':250 }
+	robot.SafeDrive(conditions)
 
 main()
 
