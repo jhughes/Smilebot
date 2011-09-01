@@ -30,10 +30,8 @@ class Rtbot(Create):
 
   # Drive safely based on a set of conditions
   def SafeDrive(self, conditions):
-    if 'velocity' in conditions:
-      velocity = conditions['velocity']
-    else:
-      velocity = VELOCITY_SLOW
+    velocity = conditions.get('velocity', VELOCITY_SLOW)
+    radius = conditions.get('radius', RADIUS_STRAIGHT)
     if 'radius' in conditions:
       radius = conditions['radius']
     else:
