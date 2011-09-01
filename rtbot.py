@@ -85,13 +85,14 @@ class Rtbot(Create):
     # Keep Driving
     return True, None
 
-  def start_server(port):
+  def start_server(self, port):
     serversocket = socket.socket(
       socket.AF_INET, socket.SOCK_STREAM)
 
     #bind the socket to a public host,
     # and a well-known port
-    hostname = socket.gethostname()
+    hostname = "192.168.1.13"
+    print hostname
     #print "Binding to", hostname
     serversocket.bind((hostname, port))
 
