@@ -16,9 +16,9 @@ def main():
   global robot
   robot = Rtbot(sys.argv[1])
   robot.start()
+  robot.start_server(1337)
   # Driving code
-  conditions = {'velocity':500, 'radius':250, 'sonar':30 }
-  robot.SafeDrive(conditions)
+  #conditions = {'velocity':500, 'radius':250, 'sonar':30 }
+  #robot.SafeDrive(conditions)
 
-main()
-
+main() 
