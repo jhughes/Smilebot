@@ -4,6 +4,7 @@ import logging
 import time
 import socket
 import struct
+import ast
 
 #=============================================================
 # put defines here e.x.
@@ -111,6 +112,10 @@ class Rtbot(Create):
         message = clientsocket.recv(length)
         if(message == "SHUTDOWN"):
           break
-        exec message
+        conditions = ast.literal_eval(message)
+        self.SafeDrive(conditions) 
+        
     except Exception as exception:
       print exception
+    finally:
+      serversocket.close()
