@@ -17,7 +17,7 @@ def main():
   robot = Rtbot(sys.argv[1])
   robot.start()
   # Driving code
-  conditions = {'velocity':500, 'radius':250 }
+  conditions = {'velocity':500, 'radius':250, 'sonar':30 }
   robot.SafeDrive(conditions)
 
 main()

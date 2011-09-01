@@ -30,17 +30,24 @@ class Rtbot(Create):
 
   # Drive safely based on a set of conditions
   def SafeDrive(self, conditions):
-    velocity = conditions['velocity'] or VELOCITY_SLOW
-    radius = conditions['radius'] or RADIUS_STRAIGHT
+    if 'velocity' in conditions:
+      velocity = conditions['velocity']
+    else:
+      velocity = VELOCITY_SLOW
+    if 'radius' in conditions:
+      radius = conditions['radius']
+    else:
+      radius = RADIUS_STRAIGHT
     try:
       self.Drive(velocity, radius)
-      distance_traveled = 0
-      degrees_rotated = 0
+      self.distance_traveled = 0
+      self.degrees_rotated = 0
+      self.sensors.GetAll()
       keep_driving, stop_reason = self.ShouldKeepDriving(conditions)
       while keep_driving:
         self.sensors.GetAll()
-        distance_traveled += abs(self.sensors.data['distance']) # in case we're going backwards we get the magnitude of distance traveled
-        degrees_rotated += abs(self.sensors.data['angle'])
+        self.distance_traveled += abs(self.sensors.data['distance']) # in case we're going backwards we get the magnitude of distance traveled
+        self.degrees_rotated += abs(self.sensors.data['angle'])
         keep_driving, stop_reason = self.ShouldKeepDriving(conditions)
     except Exception as exception:
       stop_reason = 'exception'
@@ -54,7 +61,7 @@ class Rtbot(Create):
   # What if we're just turning in place? Should we only check sonar and distance traveled if we are moving forward?
   def ShouldKeepDriving(self, conditions):
     # bumps, wheel drops, cliffs
-    for stop_case in stop_cases:
+    for stop_case in self.stop_cases:
       if self.sensors.data[stop_case]:
         print stop_case
         return False, stop_case
@@ -65,14 +72,14 @@ class Rtbot(Create):
       return False, 'sonar'
 
     # distance traveled
-    if 'distance' in conditions and distance_traveled >= conditions['distance']:
-      print 'Traveled {0}'.format(distance_traveled)
+    if 'distance' in conditions and self.distance_traveled >= conditions['distance']:
+      print 'Traveled {0}'.format(self.distance_traveled)
       return False, 'distance'
 
     # angle
-    if 'angle' in conditions and degrees_rotated >= conditions['angle']:
-      print 'Rotated {0}'.format(degrees_rotated)
+    if 'angle' in conditions and self.degrees_rotated >= conditions['angle']:
+      print 'Rotated {0}'.format(self.degrees_rotated)
       return False, 'angle'
 
     # Keep Driving
-    return True, 'none'
+    return True, None

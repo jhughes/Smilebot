@@ -2,12 +2,13 @@
 
 Roomba terminal
 
-ssh root@192.168.1.10
+ssh root@192.168.1.13
 rtlab
 python Lab01.py /dev/ttyS1
 
 Other terminal
-scp *.py root@192.168.1.10:/home/root/jon
+scp *.py root@192.168.1.13:/home/root/jon
+rtlab
 
 
 Driving conditions
