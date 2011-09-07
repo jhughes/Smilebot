@@ -16,9 +16,18 @@ def main():
   global robot
   robot = Rtbot(sys.argv[1])
   robot.start()
-  robot.start_server(80)
+  #robot.start_server(80)
   # Driving code
-  #conditions = {'velocity':500, 'radius':250, 'sonar':30 }
-  #robot.SafeDrive(conditions)
-
+  robot.SafeDrive({'distance':1414 })
+  robot.SafeDrive({'radius':1, 'angle':32 })
+  robot.SafeDrive({})
+  robot.SafeDrive({'distance':800, 'velocity':-100, 'ignore_cliff':True })
+  robot.SafeDrive({'radius':-1, 'angle':74 })
+  robot.SafeDrive({'distance':1054 })
+  robot.SafeDrive({'radius':1, 'angle':74 })
+  robot.SafeDrive({})
+  robot.SafeDrive({'distance':546, 'velocity':-100, 'ignore_bump':True })#546
+  robot.SafeDrive({'radius':-1, 'angle':74 })
+  robot.SafeDrive({'sonar':16})
+  robot.SafeDrive({'velocity':-200})
 main() 

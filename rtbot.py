@@ -14,7 +14,9 @@ class Rtbot(Create):
 
   distance_traveled = 0
   degrees_rotated = 0
-  stop_cases = ['bump-left','bump-right','wheel-drop-caster','wheel-drop-left','wheel-drop-right','cliff-right','cliff-front-right','cliff-front-left','cliff-left']
+  bumps = ['bump-left','bump-right']
+  wheel_drops = ['wheel-drop-caster','wheel-drop-left','wheel-drop-right']
+  cliffs = ['cliff-right','cliff-front-right','cliff-front-left','cliff-left']
 
   def __init__(self, tty='/dev/ttyUSB0'):
     super(Create, self).__init__(tty)
@@ -54,18 +56,33 @@ class Rtbot(Create):
       stop_reason = 'exception'
       print exception
     finally:
-      print 'Stopping'
       self.Stop()
       return stop_reason
 
   # Check if the robot should keep driving based on current sensor conditions
   # What if we're just turning in place? Should we only check sonar and distance traveled if we are moving forward?
+  # what about cliff and bump sensors while going backwards?
   def ShouldKeepDriving(self, conditions):
-    # bumps, wheel drops, cliffs
-    for stop_case in self.stop_cases:
-      if self.sensors.data[stop_case]:
-        print stop_case
-        return False, stop_case
+    # bumps
+    if not 'ignore_bump' in conditions or not conditions['ignore_bump']:
+      for bump in self.bumps:
+        if self.sensors.data[bump]:
+          print bump
+          return False, 'bump'
+
+    # wheel drops
+    if not 'ignore_wheel_drop' in conditions or not conditions['ignore_wheel_drop']:
+      for wheel_drop in self.wheel_drops:
+        if self.sensors.data[wheel_drop]:
+          print wheel_drop
+          return False, 'wheel_drop'
+
+    # cliffs
+    if not 'ignore_cliff' in conditions or not conditions['ignore_cliff']:
+      for cliff in self.cliffs:
+        if self.sensors.data[cliff]:
+          print cliff
+          return False, 'cliff'
 
     # sonar
     if 'sonar' in conditions and self.sensors.data['user-analog-input'] < conditions['sonar']:
@@ -85,6 +102,7 @@ class Rtbot(Create):
     # Keep Driving
     return True, None
 
+  # Start the bot's server
   def start_server(self, port):
     serversocket = socket.socket(
       socket.AF_INET, socket.SOCK_STREAM)
@@ -98,6 +116,7 @@ class Rtbot(Create):
 
     #become a server socket
     serversocket.listen(5) 
+    (clientsocket, address) = serversocket.accept()
 
     try:
       while 1:
@@ -105,7 +124,6 @@ class Rtbot(Create):
 
         # Accept a connection and read a byte array containing the length
         # Read the given length and execute the message sent as a python command
-        (clientsocket, address) = serversocket.accept()
         length_packet = clientsocket.recv(4)
         length = struct.unpack("i", length_packet)[0]
         message = clientsocket.recv(length)
@@ -118,3 +136,4 @@ class Rtbot(Create):
       print exception
     finally:
       serversocket.close()
+      print 'closed socket'

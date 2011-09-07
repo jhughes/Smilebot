@@ -32,3 +32,9 @@ Other Stopping conditions
 * Bump into a wall
 * Begin to drive forward off a cliff
 * Front Wheel is no longer touching the ground
+
+
+
+at speed 200 or lower:
+Distance is 1:1 with millimiters
+Angle is 75:90 with degrees
