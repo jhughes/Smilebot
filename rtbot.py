@@ -8,11 +8,14 @@ import thread
 
 #=============================================================
 # put defines here e.x.
-# define_name = define value
+BUFFER_SIZE = 1024
+COMMANDS = Queue()
+ACK = "ACK\n"
+CONFIG_CMD = "__cfg_"
+
 #=============================================================
 # define the Rtbot class to init and start itself
 class Rtbot(Create):
-
   distance_traveled = 0
   degrees_rotated = 0
   interrupt_received = False
@@ -148,3 +151,9 @@ class Rtbot(Create):
 		serversocket.close()
 		print 'closed socket'
 	
+class Robot_Controller(threading.Thread):
+  def __init__(self, robot):
+    threading.Thread.__init__(self)
+    self.rtbot = robot
+  def run(self):
+    
