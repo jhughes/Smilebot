@@ -41,7 +41,7 @@ class Rtbot(Create):
 
   # Drive safely based on a set of conditions
   def SafeDrive(self, conditions):
-	interrupt_received = False
+    interrupt_received = False
     velocity = conditions.get('velocity', VELOCITY_SLOW)
     radius = conditions.get('radius', RADIUS_STRAIGHT)
     if 'radius' in conditions:
@@ -54,7 +54,7 @@ class Rtbot(Create):
       self.degrees_rotated = 0
       self.sensors.GetAll()
       stop_reason = self.ShouldKeepDriving(conditions)
-      while !stop_reason:
+      while not stop_reason:
         self.sensors.GetAll()
         self.distance_traveled += abs(self.sensors.data['distance']) # in case we're going backwards we get the magnitude of distance traveled
         self.degrees_rotated += abs(self.sensors.data['angle'])
@@ -64,7 +64,7 @@ class Rtbot(Create):
       print exception
     finally:
       self.Stop()
-	  self.stop_state = { "stop_reason": stop_reason, "distance_traveled":self.distance_traveled, "degrees_rotated": self.degrees_rotated, "velocity": velocity, "radius": radius }
+      self.stop_state = { "stop_reason": stop_reason, "distance_traveled":self.distance_traveled, "degrees_rotated": self.degrees_rotated, "velocity": velocity, "radius": radius }
       return self.stop_state
 
   # Check if the robot should keep driving based on current sensor conditions
@@ -107,14 +107,20 @@ class Rtbot(Create):
       print 'Rotated {0}'.format(self.degrees_rotated)
       return 'angle'
 
-		if interrupt_received
-			return 'interrupt'
+    if interrupt_received:
+      return 'interrupt'
 
     # Keep Driving
     return None
 
-  def start_server_thread(self, port):
-		thread.start_new_thread(start_server, port)
+class Robot_Server(threading.Thread):
+  port = 80
+  def __init__(self, port):
+    threading.Thread.__init__(self)
+    self.port = port
+
+  def run(self):
+    start_server(port)
 
   # Start the bot's server
   def start_server(self, port):
@@ -135,7 +141,7 @@ class Rtbot(Create):
     try:
       while 1:
         # accept connections from outside
-		# Accept a connection and read a byte array containing the length
+        # Accept a connection and read a byte array containing the length
         # Read the given length and execute the message sent as a python command
         length_packet = clientsocket.recv(4)
         length = struct.unpack("i", length_packet)[0]
@@ -146,14 +152,15 @@ class Rtbot(Create):
         self.SafeDrive(conditions) 
         
     except Exception as exception:
-		print exception
+      print exception
     finally:
-		serversocket.close()
-		print 'closed socket'
-	
+      serversocket.close()
+      print 'closed socket'
+  
 class Robot_Controller(threading.Thread):
   def __init__(self, robot):
     threading.Thread.__init__(self)
     self.rtbot = robot
   def run(self):
+    print 'controller thread'
     

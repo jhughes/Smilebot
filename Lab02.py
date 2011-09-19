@@ -18,6 +18,9 @@ def main():
   global robot
   robot = Rtbot(sys.argv[1])
   robot.start()
-  driver = RobotController(robot)
+  server = Robot_Server(PORT)
+  server.start()
+  driver = Robot_Controller(robot)
   driver.start()
+  server.join()
 main() 
