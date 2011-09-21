@@ -1,4 +1,5 @@
 from pyrobot import *
+from collections import deque
 import sys
 import logging
 import time
@@ -9,16 +10,16 @@ import thread
 #=============================================================
 # put defines here e.x.
 BUFFER_SIZE = 1024
-COMMANDS = Queue()
+COMMANDS = deque([])
 ACK = "ACK\n"
 CONFIG_CMD = "__cfg_"
+INTERRUPT_RECEIVED = False
 
 #=============================================================
 # define the Rtbot class to init and start itself
 class Rtbot(Create):
   distance_traveled = 0
   degrees_rotated = 0
-  interrupt_received = False
   stop_state = {}
   bumps = ['bump-left','bump-right']
   wheel_drops = ['wheel-drop-caster','wheel-drop-left','wheel-drop-right']
@@ -41,7 +42,7 @@ class Rtbot(Create):
 
   # Drive safely based on a set of conditions
   def SafeDrive(self, conditions):
-    interrupt_received = False
+    INTERRUPT_RECEIVED = False
     velocity = conditions.get('velocity', VELOCITY_SLOW)
     radius = conditions.get('radius', RADIUS_STRAIGHT)
     if 'radius' in conditions:
@@ -107,7 +108,7 @@ class Rtbot(Create):
       print 'Rotated {0}'.format(self.degrees_rotated)
       return 'angle'
 
-    if interrupt_received:
+    if INTERRUPT_RECEIVED:
       return 'interrupt'
 
     # Keep Driving
@@ -120,7 +121,7 @@ class Robot_Server(threading.Thread):
     self.port = port
 
   def run(self):
-    start_server(port)
+    self.start_server(self.port)
 
   # Start the bot's server
   def start_server(self, port):
@@ -149,7 +150,8 @@ class Robot_Server(threading.Thread):
         if(message == "SHUTDOWN"):
           break
         conditions = eval(message)
-        self.SafeDrive(conditions) 
+        INTERRUPT_RECEIVED = True
+        COMMANDS.append(conditions)
         
     except Exception as exception:
       print exception
@@ -162,5 +164,8 @@ class Robot_Controller(threading.Thread):
     threading.Thread.__init__(self)
     self.rtbot = robot
   def run(self):
-    print 'controller thread'
-    
+    while 1:
+      if len(COMMANDS) > 0:
+        conditions = COMMANDS.popleft()
+        print "popped conditions" , conditions
+        self.rtbot.SafeDrive(conditions)

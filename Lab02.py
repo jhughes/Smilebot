@@ -13,10 +13,12 @@ DATE_FORMAT = '%H%M%S'
 HOST = ''
 PORT = 5000
 
+TTY = "/dev/ttyS1"
+
 def main():
   logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt=DATE_FORMAT) 
   global robot
-  robot = Rtbot(sys.argv[1])
+  robot = Rtbot(TTY)
   robot.start()
   server = Robot_Server(PORT)
   server.start()
