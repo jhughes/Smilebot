@@ -1,6 +1,7 @@
 from pyrobot import *
 from collections import deque
 import sys
+import signal
 import logging
 import time
 import socket
@@ -116,48 +117,63 @@ class Rtbot(Create):
 
 class Robot_Server(threading.Thread):
   port = 80
+  serversocket = None
+
+  def shutdown(self, signal, frame):
+    self.serversocket.close()
+    print 'closed socket'
+
   def __init__(self, port):
     threading.Thread.__init__(self)
     self.port = port
+    signal.signal(signal.SIGINT, self.shutdown)
 
   def run(self):
     self.start_server(self.port)
 
-  # Start the bot's server
-  def start_server(self, port):
-    serversocket = socket.socket(
-      socket.AF_INET, socket.SOCK_STREAM)
-
-    # bind the socket to a public host,
-    # and a well-known port
-    hostname = "192.168.1.13"
-    print hostname
-    #print "Binding to", hostname
-    serversocket.bind((hostname, port))
-
-    #become a server socket
-    serversocket.listen(5) 
-    (clientsocket, address) = serversocket.accept()
-
-    try:
+  def handle_connection(self, clientsocket, *args):
+    try: 
       while 1:
         # accept connections from outside
         # Accept a connection and read a byte array containing the length
         # Read the given length and execute the message sent as a python command
+        print "Waiting for packet"
         length_packet = clientsocket.recv(4)
         length = struct.unpack("i", length_packet)[0]
+        print "Received Length:", length
         message = clientsocket.recv(length)
+        print "Message: ", message
         if(message == "SHUTDOWN"):
           break
         conditions = eval(message)
         INTERRUPT_RECEIVED = True
         COMMANDS.append(conditions)
-        
+    except Exception as exception:
+      print exception
+
+  # Start the bot's server
+  def start_server(self, port):
+    self.serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    # bind the socket to a public host,
+    # and a well-known port
+    hostname = "192.168.1.10"
+    print hostname
+    #print "Binding to", hostname
+    self.serversocket.bind((hostname, port))
+
+    #become a server socket
+    self.serversocket.listen(5) 
+    print "Waiting for connection"
+
+    try:
+      while 1:
+        (clientsocket, address) = self.serversocket.accept()
+        thread.start_new_thread(self.handle_connection, (clientsocket, ))
     except Exception as exception:
       print exception
     finally:
-      serversocket.close()
-      print 'closed socket'
+      self.shutdown()
   
 class Robot_Controller(threading.Thread):
   def __init__(self, robot):
