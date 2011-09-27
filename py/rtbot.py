@@ -73,6 +73,9 @@ class Rtbot(Create):
   # What if we're just turning in place? Should we only check sonar and distance traveled if we are moving forward?
   # what about cliff and bump sensors while going backwards?
   def ShouldKeepDriving(self, conditions):
+    if len(COMMANDS) > 0:
+      return 'interrupt'
+
     # bumps
     if not 'ignore_bump' in conditions or not conditions['ignore_bump']:
       for bump in self.bumps:
@@ -108,9 +111,6 @@ class Rtbot(Create):
     if 'angle' in conditions and self.degrees_rotated >= conditions['angle']:
       print 'Rotated {0}'.format(self.degrees_rotated)
       return 'angle'
-
-    if INTERRUPT_RECEIVED:
-      return 'interrupt'
 
     # Keep Driving
     return None
