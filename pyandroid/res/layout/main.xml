@@ -11,7 +11,6 @@
 	android:id="@+id/moveForward"
 	android:background="@drawable/button"
 	android:layout_gravity="center"
-	android:onClick="moveForward"
 	 />
 	 
 	 <RelativeLayout
@@ -24,15 +23,6 @@
 			android:id="@+id/moveLeft"
 			android:background="@drawable/button"
 			android:layout_alignParentLeft="true"
-			android:onClick="moveLeft"
-			 />
-		<Button
-			android:layout_height="wrap_content"
-			android:layout_width="wrap_content"
-			android:id="@+id/stop"
-			android:text="stop"
-			android:layout_gravity="center"
-			android:onClick="stop"
 			 />
 		<Button
 			android:layout_height="wrap_content"
@@ -40,7 +30,6 @@
 			android:id="@+id/moveRight"
 			android:background="@drawable/button"
 			android:layout_alignParentRight="true"
-			android:onClick="moveRight"
 			 />
     </RelativeLayout>
 
@@ -50,7 +39,6 @@
 	android:id="@+id/moveBackward"
 	android:background="@drawable/button"
 	android:layout_gravity="center"
-	android:onClick="moveBackward"
 	 />
 	 
 </LinearLayout>

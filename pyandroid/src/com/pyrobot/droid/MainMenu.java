@@ -9,7 +9,10 @@ import java.util.Hashtable;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Message;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
+import android.widget.Button;
 import android.widget.Toast;
 
 public class MainMenu extends Activity {
@@ -25,8 +28,55 @@ public class MainMenu extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		connectToBot();
-		Instructions instructions = new Instructions();
 		setContentView(R.layout.main);
+		Button moveForwardButton = (Button) findViewById(R.id.moveForward);
+		moveForwardButton.setOnTouchListener(new OnTouchListener() {
+		    @Override
+		    public boolean onTouch(View v, MotionEvent event) {
+		        if(event.getAction() == MotionEvent.ACTION_DOWN) {
+		            moveForward();
+		        } else if (event.getAction() == MotionEvent.ACTION_UP) {
+		            stop();
+		        }
+		        return false;
+		    }
+		});
+		Button moveBackwardButton = (Button) findViewById(R.id.moveBackward);
+		moveBackwardButton.setOnTouchListener(new OnTouchListener() {
+		    @Override
+		    public boolean onTouch(View v, MotionEvent event) {
+		        if(event.getAction() == MotionEvent.ACTION_DOWN) {
+		        	moveBackward();
+		        } else if (event.getAction() == MotionEvent.ACTION_UP) {
+		            stop();
+		        }
+		        return false;
+		    }
+		});
+		Button moveLeftButton = (Button) findViewById(R.id.moveLeft);
+		moveLeftButton.setOnTouchListener(new OnTouchListener() {
+		    @Override
+		    public boolean onTouch(View v, MotionEvent event) {
+		        if(event.getAction() == MotionEvent.ACTION_DOWN) {
+		        	moveLeft();
+		        } else if (event.getAction() == MotionEvent.ACTION_UP) {
+		            stop();
+		        }
+		        return false;
+		    }
+		});
+		Button moveRightButton = (Button) findViewById(R.id.moveRight);
+		moveRightButton.setOnTouchListener(new OnTouchListener() {
+		    @Override
+		    public boolean onTouch(View v, MotionEvent event) {
+		        if(event.getAction() == MotionEvent.ACTION_DOWN) {
+		        	moveRight();
+		        } else if (event.getAction() == MotionEvent.ACTION_UP) {
+		            stop();
+		        }
+		        return false;
+		    }
+		});
 	}
 
 	public void launchControllerActivity(View v) {
@@ -39,38 +89,34 @@ public class MainMenu extends Activity {
 		Toast.makeText(MainMenu.this, message, Toast.LENGTH_SHORT).show();
 	}
 	
-	
-	public void moveForward( View v ){
+	public void stop(){
 		Instructions instructions = new Instructions();
-		instructions.setDistance(400);
+		instructions.setVelocity(0);
+		sendMessage(instructions.toString());
+	}
+	
+	public void moveForward(){
+		Instructions instructions = new Instructions();
 		instructions.setVelocity(200);
 		sendMessage(instructions.toString());
 	}
 	
-	public void moveBackward( View v ){
+	public void moveBackward(){
 		Instructions instructions = new Instructions();
-		instructions.setDistance(400);
 		instructions.setVelocity(-200);
 		instructions.setIgnoreBump(true);
 		instructions.setIgnoreCliff(true);
 		sendMessage(instructions.toString());
 	}
 
-	public void moveLeft( View v){
+	public void moveLeft(){
 		Instructions instructions = new Instructions();
-		instructions.setAngle(75);
 		instructions.setRadius(1);
 		sendMessage(instructions.toString());
 	}
-	public void stop( View v) {
-		Instructions instructions = new Instructions();
-		instructions.setVelocity(0);
-		sendMessage(instructions.toString());
-	}
 
-	public void moveRight( View v){
+	public void moveRight(){
 		Instructions instructions = new Instructions();
-		instructions.setAngle(75);
 		instructions.setRadius(-1);
 		sendMessage(instructions.toString());
 	}
