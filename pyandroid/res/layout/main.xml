@@ -54,6 +54,13 @@
 		<Button
 			android:layout_height="wrap_content"
 			android:layout_width="wrap_content"
+			android:id="@+id/kill"
+			android:text="KILL"
+			android:gravity="center_horizontal"
+			 />
+		<Button
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
 			android:id="@+id/moveRight"
 			android:background="@drawable/button"
 			android:layout_alignParentRight="true"

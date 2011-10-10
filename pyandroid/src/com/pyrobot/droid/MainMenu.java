@@ -137,6 +137,10 @@ public class MainMenu extends Activity {
 		});
 		
 	}
+	
+	public void kill() {
+		sendMessage("SHUTDOWN");
+	}
 
 	public void stop() {
 		Instructions instructions = new Instructions();
