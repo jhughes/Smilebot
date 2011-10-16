@@ -10,11 +10,15 @@ import thread
 
 #=============================================================
 # put defines here e.x.
-BUFFER_SIZE = 1024
+HOST = ""
+PORT = 0
 COMMANDS = deque([])
-ACK = "ACK\n"
-CONFIG_CMD = "__cfg_"
-INTERRUPT_RECEIVED = False
+STOP_STATES = deque([])
+CONNECTIONS = []
+MIN_SONAR_DISTANCE = 20
+MAX_FORWARD_VELOCITY = 300
+MAX_TURN_VELOCITY = 300
+
 
 #=============================================================
 # define the Rtbot class to init and start itself
@@ -41,38 +45,87 @@ class Rtbot(Create):
 # Robot Functions
 #=============================================================
 
-  # Drive safely based on a set of conditions
-  def SafeDrive(self, conditions):
-    INTERRUPT_RECEIVED = False
-    velocity = conditions.get('velocity', VELOCITY_SLOW)
-    radius = conditions.get('radius', RADIUS_STRAIGHT)
-    if 'radius' in conditions:
-      radius = conditions['radius']
-    else:
-      radius = RADIUS_STRAIGHT
+  def safe_drive(self, command):
     try:
-      self.Drive(velocity, radius)
+      # check that the command is a dictionary
+      command_dict = eval(command)
+      if not type(command_dict) is dict or len(command_dict) == 0:
+        raise Exception("Command is not a dictionary")
+
+      # check that the command has a valid command inside
+      cmd = command_dict.get('command', None)
+      if cmd == None or cmd == 'shutdown':
+        raise Exception("No valid command exists or command was to shutdown")
+
+      # create conditions based on the given command dictionary
+      conditions = {}
+      if cmd == 'forward':
+        conditions['velocity'] = min(command_dict.get('velocity', MAX_FORWARD_VELOCITY), MAX_FORWARD_VELOCITY)
+        conditions['radius'] = RADIUS_STRAIGHT
+        #conditions['sonar'] = max(command_dict.get('sonar', MIN_SONAR_DISTANCE), MIN_SONAR_DISTANCE)
+      elif cmd == 'left':
+        conditions['velocity'] = min(command_dict.get('velocity', MAX_TURN_VELOCITY), MAX_TURN_VELOCITY)
+        conditions['radius'] = RADIUS_TURN_IN_PLACE_CCW
+      elif cmd == 'right':
+        conditions['velocity'] = min(command_dict.get('velocity', MAX_TURN_VELOCITY), MAX_TURN_VELOCITY)
+        conditions['radius'] = RADIUS_TURN_IN_PLACE_CW
+      elif cmd == 'stop':
+        conditions['velocity'] = 0
+      else:
+        print "command not recognized!"
+        return None
+
+      # add stop conditions in they are in the command
+      if 'distance' in command:
+        conditions['distance'] = abs(command_dict.get('distance', 0))
+      if 'angle' in command:
+        conditions['angle'] = abs(command_dict.get('angle', 0))
+
+      #perform a conditional drive with safe conditions
+      stop_state = self.conditional_drive(conditions)
+      
+      # back up if we bumped into something or are at a cliff
+      if stop_state['stop_reason'] == "bump" or stop_state['stop_reason'] == "cliff":
+        backup_state = self.back_up()
+        stop_state['distance_traveled'] -= backup_state['distance_traveled']
+        stop_state['sonar'] = backup_state['sonar']
+      # make a sound if we have a wheel drop to alert user of our situation
+      elif stop_state['stop_reason'] == "wheel_drop":
+        self.play_sound()
+
+      return stop_state
+
+    except Exception as exception:
+      print exception
+    
+    return None
+
+  # Drive based on a set of conditions
+  def conditional_drive(self, conditions):
+    try:
+      velocity = conditions.get('velocity', 0)
+      radius = conditions.get('radius', RADIUS_STRAIGHT)
       self.distance_traveled = 0
       self.degrees_rotated = 0
       self.sensors.GetAll()
-      stop_reason = self.ShouldKeepDriving(conditions)
+      stop_reason = self.should_keep_driving(conditions)
+      if not stop_reason:
+        self.Drive(velocity, radius)
       while not stop_reason:
-        self.sensors.GetAll()
-        self.distance_traveled += abs(self.sensors.data['distance']) # in case we're going backwards we get the magnitude of distance traveled
+        self.distance_traveled += abs(self.sensors.data['distance'])
         self.degrees_rotated += abs(self.sensors.data['angle'])
-        stop_reason = self.ShouldKeepDriving(conditions)
+        self.sensors.GetAll()
+        stop_reason = self.should_keep_driving(conditions)
     except Exception as exception:
       stop_reason = 'exception'
       print exception
     finally:
       self.Stop()
-      self.stop_state = { "stop_reason": stop_reason, "distance_traveled":self.distance_traveled, "degrees_rotated": self.degrees_rotated, "velocity": velocity, "radius": radius }
+      self.stop_state = { "stop_reason": stop_reason, "distance_traveled":self.distance_traveled, "degrees_rotated": self.degrees_rotated, "sonar": self.sensors.data['user-analog-input'],"velocity": velocity, "radius": radius }
       return self.stop_state
 
   # Check if the robot should keep driving based on current sensor conditions
-  # What if we're just turning in place? Should we only check sonar and distance traveled if we are moving forward?
-  # what about cliff and bump sensors while going backwards?
-  def ShouldKeepDriving(self, conditions):
+  def should_keep_driving(self, conditions):
     if len(COMMANDS) > 0:
       return 'interrupt'
 
@@ -83,19 +136,19 @@ class Rtbot(Create):
           print bump
           return 'bump'
 
-    # wheel drops
-    if not 'ignore_wheel_drop' in conditions or not conditions['ignore_wheel_drop']:
-      for wheel_drop in self.wheel_drops:
-        if self.sensors.data[wheel_drop]:
-          print wheel_drop
-          return 'wheel_drop'
-
     # cliffs
     if not 'ignore_cliff' in conditions or not conditions['ignore_cliff']:
       for cliff in self.cliffs:
         if self.sensors.data[cliff]:
           print cliff
           return 'cliff'
+
+    # wheel drops
+    if not 'ignore_wheel_drop' in conditions or not conditions['ignore_wheel_drop']:
+      for wheel_drop in self.wheel_drops:
+        if self.sensors.data[wheel_drop]:
+          print wheel_drop
+          return 'wheel_drop'
 
     # sonar
     if 'sonar' in conditions and self.sensors.data['user-analog-input'] < conditions['sonar']:
@@ -114,3 +167,34 @@ class Rtbot(Create):
 
     # Keep Driving
     return None
+
+  def back_up(self):
+    try:
+      self.Drive(-100, RADIUS_STRAIGHT)
+      self.distance_traveled = 0
+      self.sensors.GetAll()
+      while self.should_keep_backing_up():
+        self.distance_traveled += abs(self.sensors.data['distance'])
+        self.sensors.GetAll()
+    except Exception as exception:
+      print exception
+    finally:
+      self.Stop()
+      self.stop_state = { "distance_traveled":self.distance_traveled, "sonar": self.sensors.data['user-analog-input'] }
+      return self.stop_state
+
+  def should_keep_backing_up(self):
+    # bumps
+    for bump in self.bumps:
+      if self.sensors.data[bump]:
+        return True
+
+    # cliffs
+    for cliff in self.cliffs:
+      if self.sensors.data[cliff]:
+        return True
+    return False
+
+  def play_sound(self):
+    # TODO: play a horrible death noise
+    print "beep"

@@ -19,14 +19,18 @@ def main():
   if len(sys.argv) < 3:
     print "run again with arguments: address port"
     return
+  HOST = sys.argv[1]
+  PORT = int(sys.argv[2])
   logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt=DATE_FORMAT) 
   global robot
   robot = Rtbot(TTY)
   robot.start()
-  server = Robot_Server(sys.argv[1], int(sys.argv[2]))
-  server.start()
   driver = Robot_Controller(robot)
   driver.start()
-  server.join()
+  #robot.safe_drive('{"command": "forward"}')
+  #robot.safe_drive('{"command": "left", "angle": 90}')
+  #COMMANDS.append('{"command": "right"}')
+  server = SocketServer.TCPServer((HOST, PORT), Robot_Server)
+  server.serve_forever()
   driver.join()
 main() 
