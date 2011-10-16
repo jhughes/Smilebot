@@ -15,9 +15,9 @@ PORT = 0
 COMMANDS = deque([])
 STOP_STATES = deque([])
 CONNECTIONS = []
-MIN_SONAR_DISTANCE = 20
-MAX_FORWARD_VELOCITY = 300
-MAX_TURN_VELOCITY = 300
+MIN_SONAR_DISTANCE = 27
+MAX_FORWARD_VELOCITY = 200
+MAX_TURN_VELOCITY = 150
 
 
 #=============================================================
@@ -62,7 +62,7 @@ class Rtbot(Create):
       if cmd == 'forward':
         conditions['velocity'] = min(command_dict.get('velocity', MAX_FORWARD_VELOCITY), MAX_FORWARD_VELOCITY)
         conditions['radius'] = RADIUS_STRAIGHT
-        #conditions['sonar'] = max(command_dict.get('sonar', MIN_SONAR_DISTANCE), MIN_SONAR_DISTANCE)
+        conditions['sonar'] = max(command_dict.get('sonar', MIN_SONAR_DISTANCE), MIN_SONAR_DISTANCE)
       elif cmd == 'left':
         conditions['velocity'] = min(command_dict.get('velocity', MAX_TURN_VELOCITY), MAX_TURN_VELOCITY)
         conditions['radius'] = RADIUS_TURN_IN_PLACE_CCW
