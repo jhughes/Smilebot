@@ -12,7 +12,7 @@ public class Instructions {
 
 	public String toString() {
 		StringBuilder string = new StringBuilder();
-		string.append('{');
+		string.append(" {");
 		for (Entry<String, String> entry : instructions.entrySet()) {
 			string.append(String.format("'%s':%s,", entry.getKey(), entry.getValue().toString()));
 		}
@@ -20,7 +20,7 @@ public class Instructions {
 		if(lastComma > 0){
 			string.deleteCharAt(lastComma);
 		}
-		string.append('}');
+		string.append("}\n");
 		return string.toString();
 	}
 
@@ -28,12 +28,12 @@ public class Instructions {
 		instructions.put(key, value);
 	}
 
+	public void setCommand(String command) {
+		instructions.put("command", command);
+	}
+	
 	public void setVelocity(int velocity) {
 		instructions.put("velocity", Integer.toString(velocity));
-	}
-
-	public void setRadius(int radius) {
-		instructions.put("radius", Integer.toString(radius));
 	}
 
 	public void setDistance(int distance) {
@@ -46,17 +46,5 @@ public class Instructions {
 
 	public void setSonar(int sonar) {
 		instructions.put("sonar", Integer.toString(sonar));
-	}
-
-	public void setIgnoreBump(boolean ignoreBump) {
-		instructions.put("ignore_bump", ignoreBump ? "True" : "False");
-	}
-
-	public void setIgnoreWheelDrop(boolean ignoreWheelDrop) {
-		instructions.put("ignore_wheel_drop", ignoreWheelDrop ? "True" : "False");
-	}
-
-	public void setIgnoreCliff(boolean ignoreCliff) {
-		instructions.put("ignore_cliff", ignoreCliff ? "True" : "False");
 	}
 }

@@ -34,11 +34,12 @@ public class MainMenu extends Activity {
             public void onClick(View v) {
             	EditText ip_view = (EditText) findViewById(R.id.ip_edit);
         		EditText port_view = (EditText) findViewById(R.id.port_edit);
-                
-            	connectToBot(ip_view.getText().toString(),port_view.getText().toString());
+        		
+    			robotHostName = ip_view.getText().toString();
+    			robotHostPort = Integer.parseInt(port_view.getText().toString()); 
 
         		initializeButtons();
-        		startHeartbeat();
+        		//startHeartbeat();
             }
         });
 	}
@@ -99,18 +100,6 @@ public class MainMenu extends Activity {
 				return false;
 			}
 		});
-		Button moveBackwardButton = (Button) findViewById(R.id.moveBackward);
-		moveBackwardButton.setOnTouchListener(new OnTouchListener() {
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				if (event.getAction() == MotionEvent.ACTION_DOWN) {
-					moveBackward();
-				} else if (event.getAction() == MotionEvent.ACTION_UP) {
-					stop();
-				}
-				return false;
-			}
-		});
 		Button moveLeftButton = (Button) findViewById(R.id.moveLeft);
 		moveLeftButton.setOnTouchListener(new OnTouchListener() {
 			@Override
@@ -149,48 +138,37 @@ public class MainMenu extends Activity {
 	}
 	
 	public void kill() {
-		sendMessage("SHUTDOWN");
+		sendMessage(" shutdown\n");
 	}
 
 	public void stop() {
 		Instructions instructions = new Instructions();
-		instructions.setVelocity(0);
+		instructions.setCommand("\"stop\"");
 		sendMessage(instructions.toString());
 	}
 
 	public void moveForward() {
 		Instructions instructions = new Instructions();
-		instructions.setVelocity(500);
-		sendMessage(instructions.toString());
-	}
-
-	public void moveBackward() {
-		Instructions instructions = new Instructions();
-		instructions.setVelocity(-500);
-		instructions.setIgnoreBump(true);
-		instructions.setIgnoreCliff(true);
+		instructions.setCommand("\"forward\"");
 		sendMessage(instructions.toString());
 	}
 
 	public void moveLeft() {
 		Instructions instructions = new Instructions();
-		instructions.setRadius(1);
+		instructions.setCommand("\"left\"");
 		sendMessage(instructions.toString());
 	}
 
 	public void moveRight() {
 		Instructions instructions = new Instructions();
-		instructions.setRadius(-1);
+		instructions.setCommand("\"right\"");
 		sendMessage(instructions.toString());
 	}
 
-	private void connectToBot(String hostname, String port) {
+	private void connectToBot() {
 		try {
-			robotSocket = new Socket(hostname, Integer.parseInt(port));
+			robotSocket = new Socket(robotHostName, robotHostPort);
 			robotOutputStream = robotSocket.getOutputStream();
-			alert("Robot connected");
-			robotHostName = hostname;
-			robotHostPort = Integer.parseInt(port); 
 		} catch (UnknownHostException e) {
 			alert(e.toString());
 		} catch (IOException e) {
@@ -205,10 +183,10 @@ public class MainMenu extends Activity {
 
 	private void sendMessage(String message) {
 		try {
-			int size = message.length();
-			robotOutputStream.write(intToByteArray(size));
+			connectToBot();
 			robotOutputStream.write(message.getBytes());
 			robotOutputStream.flush();
+			robotSocket.close();
 		} catch (IOException e) {
 			alert(e.toString());
 		}
