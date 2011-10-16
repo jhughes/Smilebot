@@ -135,7 +135,17 @@ public class MainMenu extends Activity {
 				return false;
 			}
 		});
-		
+		Button killButton = (Button) findViewById(R.id.kill);
+		killButton.setOnTouchListener(new OnTouchListener() {
+			
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				if (event.getAction() == MotionEvent.ACTION_UP) {
+					kill();
+				}
+				return false;
+			}
+		});	
 	}
 	
 	public void kill() {
