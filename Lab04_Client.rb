@@ -22,7 +22,7 @@ class PaintingClient
     # Initialize your variablez
     @theta = 0.0
     @x = 0.0
-    @timeslot_length = 200
+    @timeslot_length = 100
     @color = generate_color
     #@mutex = Mutex.new
 

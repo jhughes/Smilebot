@@ -1,0 +1,9 @@
+real part of eigen value is the size of error
+1. 0
+2. imaginary part of eigen value is the period/frequency
+3. negative (e^-eigenvalue) - small error
+4. negative 
+5. increase
+6. decrease
+7. integral gain
+8. increase, proportional, integral
