@@ -1,18 +1,19 @@
 package com.pyrobot.droid;
 
 import android.app.Activity;
+import android.graphics.ImageFormat;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
+import android.hardware.Camera;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.hardware.Camera;
 
 public class RobotServer extends Activity  {
 
 	private SurfaceView mSurfaceView;	
 	private SurfaceHolder holder;
 	private Camera mCamera;
-
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -31,5 +32,7 @@ public class RobotServer extends Activity  {
 		SurfaceHolderCallback callback = new SurfaceHolderCallback(holder);
 		holder.addCallback(callback);
 	}
+	
+
 
 }
