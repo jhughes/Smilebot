@@ -10,6 +10,7 @@ import android.view.SurfaceHolder;
 
 public class SurfaceHolderCallback implements SurfaceHolder.Callback{
 
+	protected static final String TAG = "SurfaceHolder";
 	public Camera mCamera;
 	public SurfaceHolder holder;
 	private int width = 600;
@@ -26,6 +27,7 @@ public class SurfaceHolderCallback implements SurfaceHolder.Callback{
 	    mCamera.setParameters(params);
 
 		try {
+			mCamera.setPreviewCallback(mPreviewCallback);
 			mCamera.setPreviewDisplay(holder);
 		} catch (Exception e) {
 			Log.e("exception", e.toString());
@@ -63,10 +65,11 @@ public class SurfaceHolderCallback implements SurfaceHolder.Callback{
 				Rect rect = new Rect(0,0,width,height);
 
 				BOutputStream bos = new BOutputStream();
-				yuvi.compressToJpeg(rect, 70, bos);
-				//bos.send_udp(serverIP, videoPort);
+				yuvi.compressToJpeg(rect, 10, bos);
+				bos.send_udp(VideoDecodeThread.IP, VideoDecodeThread.PORT);
+				Log.i(TAG, "sent frame");
 			} catch (Exception e) {
-				// TODO: handle exception
+				Log.e(TAG, e.toString());
 			};
 		}
 	};

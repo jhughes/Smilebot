@@ -17,7 +17,7 @@ public class ModeSelect extends Activity {
 		setUpButtons();
 	}
 	private void setUpButtons() {
-		Button client_button = (Button) findViewById(R.id.RobotClientBtn);
+		Button client_button = (Button) findViewById(R.id.RobotClientButton);
 		client_button.setOnClickListener(new OnClickListener() {
 			
 			@Override
@@ -26,7 +26,8 @@ public class ModeSelect extends Activity {
 				startActivity(client_intent);
 			}
 		});
-		Button server_button = (Button) findViewById(R.id.RobotServerBtn);
+
+		Button server_button = (Button) findViewById(R.id.RobotServerButton);
 		server_button.setOnClickListener(new OnClickListener() {
 			
 			@Override
