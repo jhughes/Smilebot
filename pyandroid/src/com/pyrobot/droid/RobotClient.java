@@ -18,6 +18,7 @@ public class RobotClient extends Activity {
 
 	private static final String TAG = "RobotClient";
 	private VideoDecodeThread vdt;
+	private Object lock = new Object();
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -37,8 +38,10 @@ public class RobotClient extends Activity {
         	byte[] packet = b.getByteArray("packet");
         	ImageView v = (ImageView) findViewById(R.id.cameraView);
         	Bitmap bm = BitmapFactory.decodeByteArray(packet, 12, packet.length-12);
-        	v.setImageBitmap(bm);
-        	v.invalidate();
+        	synchronized (lock) {
+            	v.setImageBitmap(bm);
+            	v.invalidate();
+			}
         }
 	};
 

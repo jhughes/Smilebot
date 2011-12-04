@@ -15,7 +15,7 @@ public class VideoDecodeThread extends Thread {
 	private boolean alive = false;
 	public static final String IP = "192.17.100.26";
 	public static int PORT = 5305;
-	private int maxPacketSize = 50000;
+	private int maxPacketSize = 10000;
 	private Handler handler;
 	
 	public VideoDecodeThread(Handler handler){

@@ -32,8 +32,8 @@
 			android:layout_gravity="right|center_vertical"
 			 />
 	    <ImageView 
-	        android:layout_width="600px"
-	        android:layout_height="480px"
+	        android:layout_width="352px"
+	        android:layout_height="288px"
 	        android:id="@+id/cameraView"
 	        android:src="@drawable/logo2big"
 	        android:layout_gravity="center"/>

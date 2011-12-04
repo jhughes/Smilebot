@@ -8,7 +8,7 @@ import java.net.InetSocketAddress;
 
 public class BOutputStream extends OutputStream {
 	
-		private int maxSize = 50000;
+		private int maxSize = 10000;
 		
 		byte[] buffer = new byte[maxSize];
 		public int size = 12;
