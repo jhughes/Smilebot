@@ -1,5 +1,8 @@
 package com.pyrobot.droid;
 
+import android.graphics.ImageFormat;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.util.Log;
@@ -7,8 +10,11 @@ import android.view.SurfaceHolder;
 
 public class SurfaceHolderCallback implements SurfaceHolder.Callback{
 
+	protected static final String TAG = "SurfaceHolder";
 	public Camera mCamera;
 	public SurfaceHolder holder;
+	private int width = 600;
+	private int height = 480;
 	
 	public SurfaceHolderCallback(SurfaceHolder holder) {
 		this.holder = holder;
@@ -16,10 +22,12 @@ public class SurfaceHolderCallback implements SurfaceHolder.Callback{
 	public void initCamera(){
 		mCamera = Camera.open();
 	    Parameters params = mCamera.getParameters();
+	    //params.setPreviewSize(width, height);
 	    params.setFlashMode(Parameters.FLASH_MODE_ON);
 	    mCamera.setParameters(params);
 
 		try {
+			mCamera.setPreviewCallback(mPreviewCallback);
 			mCamera.setPreviewDisplay(holder);
 		} catch (Exception e) {
 			Log.e("exception", e.toString());
@@ -48,4 +56,21 @@ public class SurfaceHolderCallback implements SurfaceHolder.Callback{
 		mCamera.stopPreview();
 		mCamera.release();
 	}
+	
+	Camera.PreviewCallback mPreviewCallback = new Camera.PreviewCallback() {
+		@Override
+		public void onPreviewFrame(byte[] data, Camera camera) {
+			try{
+				YuvImage yuvi = new YuvImage(data, ImageFormat.NV21, width, height, null);
+				Rect rect = new Rect(0,0,width,height);
+
+				BOutputStream bos = new BOutputStream();
+				yuvi.compressToJpeg(rect, 10, bos);
+				bos.send_udp(VideoDecodeThread.IP, VideoDecodeThread.PORT);
+				Log.i(TAG, "sent frame");
+			} catch (Exception e) {
+				Log.e(TAG, e.toString());
+			};
+		}
+	};
 }

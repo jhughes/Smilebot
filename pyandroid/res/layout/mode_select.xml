@@ -27,13 +27,13 @@
 		<Button
 			android:layout_height="wrap_content"
 			android:layout_width="wrap_content"
-			android:id="@+id/RobotClientBtn"
+			android:id="@+id/RobotClientButton"
 			android:text="Client"
 			/>
 		<Button
 			android:layout_height="wrap_content"
 			android:layout_width="wrap_content"
-			android:id="@+id/RobotServerBtn"
+			android:id="@+id/RobotServerButton"
 			android:text="Server"
 			 />
 </LinearLayout>

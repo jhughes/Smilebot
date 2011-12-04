@@ -10,16 +10,22 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.hardware.Camera;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.hardware.Camera;
+import android.widget.ImageView;
 
 public class RobotServer extends Activity {
 
 	private SurfaceView mSurfaceView;
 	private SurfaceHolder holder;
 	private Camera mCamera;
+	private VideoDecodeThread vdt;
 
 	ServerSocket socket;
 	ArrayList<Socket> clients;
@@ -62,7 +68,7 @@ public class RobotServer extends Activity {
 		SurfaceHolderCallback callback = new SurfaceHolderCallback(holder);
 		holder.addCallback(callback);
 	}
-
+	
 	public Thread relayThread = new Thread() {
 		public void run() {
 			byte[] buffer = new byte[1024];
