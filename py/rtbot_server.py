@@ -8,24 +8,24 @@ import logging
 import time
 import struct
 import os
-import SocketServer
+import socket
 
-class ThreadedTCPRequestHandler(SocketServer.StreamRequestHandler):
+class Robot_Server(threading.Thread):
 
-  allow_reuse_address = True
+  def __init__(self, robot):
+    threading.Thread.__init__(self)
+    self.rtbot = robot
 
-  def handle(self):
-    print "handling!"
-    try: 
-      message = self.rfile.readline().strip()
-      print "Message: ", message
-      if(message == 'shutdown'):
-        COMMANDS.append({'command':'shutdown'})
-        self.server.shutdown()
-        return
-      COMMANDS.append(message)
-    except Exception as exception:
-      print exception
-
-class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
-  pass
+  def run(self):
+    HOST = ''                # Symbolic name meaning all available interfaces
+    PORT = 5000              # Arbitrary non-privileged port
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind((HOST, PORT))
+    s.listen(1)
+    conn, addr = s.accept()
+    print 'Connected by', addr
+    while 1:
+        data = conn.recv(1024)
+        if not data: break
+        COMMANDS.append(data)
+    conn.close()
