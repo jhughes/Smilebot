@@ -28,7 +28,7 @@ public class RobotServer extends Activity {
 	private VideoDecodeThread vdt;
 
 	ServerSocket socket;
-	ArrayList<Socket> clients;
+	public static ArrayList<Socket> clients;
 	ArrayList<InputStream> ins;
 	ArrayList<OutputStream> outs;
 
@@ -44,9 +44,9 @@ public class RobotServer extends Activity {
 
 	public void init() {
 		initHolder();
-		connectToRobot();
+		//connectToRobot();
 		clientAcceptThread.start();
-		relayThread.start();
+		//relayThread.start();
 	}
 
 	public void connectToRobot() {

@@ -1,5 +1,6 @@
 package com.pyrobot.droid;
 
+import java.net.Socket;
 import java.util.List;
 
 import android.graphics.ImageFormat;
@@ -76,7 +77,9 @@ public class SurfaceHolderCallback implements SurfaceHolder.Callback{
 
 				BOutputStream bos = new BOutputStream();
 				yuvi.compressToJpeg(rect, COMPRESSION_RATE , bos);
-				bos.send_udp(VideoDecodeThread.IP, VideoDecodeThread.PORT);
+				for (Socket client : RobotServer.clients ) {
+					bos.send_udp(client.getInetAddress().getHostName(), VideoDecodeThread.PORT);
+				}
 				Log.i(TAG, "sent frame");
 			} catch (Exception e) {
 				Log.e(TAG, e.toString());
