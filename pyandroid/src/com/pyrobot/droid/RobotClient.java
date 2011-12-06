@@ -33,6 +33,7 @@ public class RobotClient extends Activity {
 	private AudioSendThread audioSend = null;
 	private Object lock = new Object();
 
+
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -51,11 +52,11 @@ public class RobotClient extends Activity {
 	}
 
 	public void init() {
-		// initializeButtons();
-		vdt = new VideoDecodeThread(handler);
-		//adt = new AudioDecodeThread();
-		//audioSend = new AudioSendThread();
+//		initializeButtons();
 		connectToServer();
+//		vdt = new VideoDecodeThread(handler);
+		adt = new AudioDecodeThread();
+		audioSend = new AudioSendThread();
 	}
 
 	final Handler handler = new Handler() {
@@ -174,7 +175,7 @@ public class RobotClient extends Activity {
 	
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+		if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
 			audioSend.sendAudio();
 			return true;
 		} else {
@@ -184,7 +185,7 @@ public class RobotClient extends Activity {
 	
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
-		if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+		if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
 			audioSend.stopSendingAudio();
 			return true;
 		} else {

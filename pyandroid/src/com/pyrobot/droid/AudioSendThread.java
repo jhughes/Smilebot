@@ -12,7 +12,7 @@ import android.util.Log;
 
 public class AudioSendThread extends Thread {
 
-	public static final int PORT = ModeSelect.port + 1;
+	public static final int PORT = ModeSelect.port + 9991;
 	private int audioBufferSize;
 	private AudioRecord audioRecord;
 	private byte[] audioBuffer;
@@ -20,15 +20,19 @@ public class AudioSendThread extends Thread {
 	private boolean isServer = false;
 	private String TAG = "AudioSendThread";
 	private boolean shouldSendAudio = false;
+	private Object lock = new Object();
 
 	public AudioSendThread(boolean isServer) {
-		this();
 		this.isServer = isServer;
+		initAudioRecord();
+		alive = true;
+		this.start();
 	}
 	
 	public AudioSendThread() {
 		initAudioRecord();
 		alive = true;
+		this.isServer = false;
 		this.start();
 	}
 
@@ -40,12 +44,22 @@ public class AudioSendThread extends Thread {
 	}
 
 	public void sendAudio() {
-		shouldSendAudio = true;
+		synchronized (lock) {
+			if(shouldSendAudio) return; // Already sending audio
+			shouldSendAudio = true;
+			audioRecord.startRecording();
+			Log.i(TAG, "Sending audio..");
+		}
 	}
 	public void stopSendingAudio() {
-		shouldSendAudio = false;
+		synchronized (lock) {
+			if(!shouldSendAudio) return; // Already not sending audio
+			shouldSendAudio = false;
+			audioRecord.stop();
+			Log.i(TAG, "Stopping audio sending...");
+		}
 	}
-	
+		
 	public void initAudioRecord() {
 
 		try {
@@ -60,9 +74,12 @@ public class AudioSendThread extends Thread {
 			audioBuffer = new byte[audioBufferSize];
 			// audioRecord = findAudioRecord();
 			if( audioRecord != null) {
-				audioRecord.getState();
-				audioRecord.startRecording();
-				Log.i(TAG, "Audio recording started..");
+//				audioRecord.getState();
+				if( isServer) {
+					audioRecord.startRecording();
+					shouldSendAudio = true;
+				}
+				Log.i(TAG, "Audio recording enabled..");
 			} else {
 				Log.e(TAG, "Audio record is null");
 			}
@@ -106,11 +123,14 @@ public class AudioSendThread extends Thread {
 				BufferedOutputStream bos = new BufferedOutputStream(os);
 				DataOutputStream dos = new DataOutputStream(bos);
 				while (alive) {
-					if( shouldSendAudio || isServer ) {
-						int bufferReadResult = audioRecord.read(audioBuffer, 0,
-								audioBufferSize);
-						//Log.i(TAG, "read " + bufferReadResult + "bytes of audio");
-						dos.write(audioBuffer);
+					synchronized (lock ) {
+						if( shouldSendAudio || isServer ) {
+							int bufferReadResult = audioRecord.read(audioBuffer, 0,
+									audioBufferSize);
+							Log.i(TAG, "read " + bufferReadResult + " bytes of audio");
+							dos.write(audioBuffer);
+							dos.flush();
+						}
 					}
 				}
 				dos.close();
@@ -120,7 +140,7 @@ public class AudioSendThread extends Thread {
 				e.printStackTrace();
 				try {
 					// Check to see in 500ms to see if the server is up
-					Thread.sleep(5000);
+					Thread.sleep(500);
 				} catch (InterruptedException e1) {
 					Log.e(TAG, "Welcome to try/catch Java hell");
 					e1.printStackTrace();
@@ -129,23 +149,3 @@ public class AudioSendThread extends Thread {
 		}
 	}
 }
-
-
-/*
- * For the robot server to send audio back
-if( RobotServer.clients != null) {
-	size = RobotServer.clients.size();
-} else {
-	Log.i(TAG, "No client.. trying later");
-	throw new Exception();
-}
-if( size <= 0) {
-	Log.i(TAG, "No client.. trying later");
-	throw new Exception();
-}
-Log.i(TAG,"Creating socket....");
-// SUPER DUPER HACK
-Socket client = RobotServer.clients.get(0);
-Log.i(TAG,"Connecting to client....");
-Socket socket = new Socket(client.getInetAddress().getHostName(), VideoDecodeThread.PORT);
-*/

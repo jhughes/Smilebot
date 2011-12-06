@@ -18,6 +18,7 @@ public class AudioDecodeThread extends Thread {
 	private ServerSocket servSock = null;
 	private byte[] audioBuffer = null;
 	private AudioTrack audioTrack = null;
+	private Object audioLock = null;
 
 	public AudioDecodeThread() {
 		alive = true;
@@ -43,16 +44,27 @@ public class AudioDecodeThread extends Thread {
 		Socket client = null;
 		InputStream is = null;
 		BufferedInputStream bis = null;
+		int size;
 		try {
 			servSock = new ServerSocket(AudioSendThread.PORT);
 			Log.i(TAG, "Started audio server");
 			client = servSock.accept();
 			is = client.getInputStream();
 			bis = new BufferedInputStream(is);
+			size = bis.read(audioBuffer);
+			if( size > 0)
+				audioTrack.write(audioBuffer, 0, size);
 			audioTrack.play();
+			Log.i(TAG, "Received connection, started playing...");
 			while (alive) {
-				bis.read(audioBuffer);
-				audioTrack.write(audioBuffer, 0, audioBufferSize);
+				size = bis.read(audioBuffer);
+				Log.i(TAG, "Read " + size + " bytes" );
+				if( size > 0) {
+					audioTrack.write(audioBuffer, 0, size);
+				} else {
+					alive = false;
+					Log.e(TAG, "Something wrong with the stream..?");
+				}
 			}
 			if (client != null) {
 				client.close();

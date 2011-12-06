@@ -35,6 +35,7 @@ public class RobotServer extends Activity {
 	
 	private AudioSendThread audioSend = null;
 	private AudioDecodeThread audioDecode = null;
+	private Object audioLock = new Object();
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -49,14 +50,14 @@ public class RobotServer extends Activity {
 	}
 
 	public void init() {
-		initHolder();
-		//connectToRobot();
+//		initHolder();
+//		connectToRobot();
 		clientAcceptThread.start();
 		/* HACK HACK HACK */
-		//boolean isServer = true;
-		//audioSend = new AudioSendThread(isServer);
-		//audioDecode = new AudioDecodeThread();
-		//relayThread.start();
+		boolean isServer = true;
+		audioSend = new AudioSendThread(isServer);
+		audioDecode = new AudioDecodeThread();
+//		relayThread.start();
 	}
 
 	public void connectToRobot() {
