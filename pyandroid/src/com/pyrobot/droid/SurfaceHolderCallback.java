@@ -59,9 +59,11 @@ public class SurfaceHolderCallback implements SurfaceHolder.Callback{
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		// TODO Auto-generated method stub
-		//mCamera.stopPreview();
-		if(mCamera != null)
-			mCamera.release();
+		if(mCamera != null) {
+			mCamera.stopPreview();
+            mCamera.release();
+            mCamera = null;
+		}
 	}
 	
 	Camera.PreviewCallback mPreviewCallback = new Camera.PreviewCallback() {

@@ -14,7 +14,7 @@ public class VideoDecodeThread extends Thread {
 	private static final String TAG = "VideoDecodeThread";
 	private boolean alive = false;
 	public static final String IP = "192.17.100.26";
-	public static int PORT = 5305;
+	public static int PORT = 5310;
 	private int maxPacketSize = 10000;
 	private Handler handler;
 	
@@ -42,7 +42,10 @@ public class VideoDecodeThread extends Thread {
 				msg.setData(b);
 				handler.sendMessage(msg);
 			}
-			s.close();
+			if( s != null ) {
+				s.close();
+				s = null;
+			}
 		} catch (Exception e) {
 			Log.e(TAG, e.toString());
 		}
