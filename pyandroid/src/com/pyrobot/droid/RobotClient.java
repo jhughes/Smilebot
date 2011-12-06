@@ -52,9 +52,9 @@ public class RobotClient extends Activity {
 	}
 
 	public void init() {
-//		initializeButtons();
+		initializeButtons();
 		connectToServer();
-//		vdt = new VideoDecodeThread(handler);
+		vdt = new VideoDecodeThread(handler);
 		adt = new AudioDecodeThread();
 		audioSend = new AudioSendThread();
 	}

@@ -50,13 +50,14 @@ public class RobotServer extends Activity {
 	}
 
 	public void init() {
-//		initHolder();
+		initHolder();
 //		connectToRobot();
 		clientAcceptThread.start();
 		/* HACK HACK HACK */
 		boolean isServer = true;
 		audioSend = new AudioSendThread(isServer);
 		audioDecode = new AudioDecodeThread();
+		audioDecode.setSendThread(audioSend);
 //		relayThread.start();
 	}
 

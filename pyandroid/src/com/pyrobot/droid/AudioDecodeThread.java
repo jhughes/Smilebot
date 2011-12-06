@@ -19,12 +19,17 @@ public class AudioDecodeThread extends Thread {
 	private byte[] audioBuffer = null;
 	private AudioTrack audioTrack = null;
 	private Object audioLock = null;
-
+	private AudioSendThread ast = null;
+	
 	public AudioDecodeThread() {
 		alive = true;
 		audioBuffer = new byte[audioBufferSize];
 		initPlay();
 		this.start();
+	}
+	
+	public void setSendThread(AudioSendThread ast) {
+		this.ast = ast;
 	}
 	
 	public void shutdown() {
@@ -57,6 +62,7 @@ public class AudioDecodeThread extends Thread {
 			audioTrack.play();
 			Log.i(TAG, "Received connection, started playing...");
 			while (alive) {
+//				ast.stopSendingAudio();
 				size = bis.read(audioBuffer);
 				Log.i(TAG, "Read " + size + " bytes" );
 				if( size > 0) {
@@ -65,6 +71,7 @@ public class AudioDecodeThread extends Thread {
 					alive = false;
 					Log.e(TAG, "Something wrong with the stream..?");
 				}
+//				ast.sendAudio();
 			}
 			if (client != null) {
 				client.close();
