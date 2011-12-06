@@ -49,13 +49,10 @@ public class SurfaceHolderCallback implements SurfaceHolder.Callback{
 	@Override
 	public void surfaceChanged(SurfaceHolder holder, int format, int width,
 			int height) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
-		// TODO Auto-generated method stub
 		initCamera();
 	}
 
@@ -63,7 +60,8 @@ public class SurfaceHolderCallback implements SurfaceHolder.Callback{
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		// TODO Auto-generated method stub
 		//mCamera.stopPreview();
-		mCamera.release();
+		if(mCamera != null)
+			mCamera.release();
 	}
 	
 	Camera.PreviewCallback mPreviewCallback = new Camera.PreviewCallback() {
@@ -80,7 +78,7 @@ public class SurfaceHolderCallback implements SurfaceHolder.Callback{
 				for (Socket client : RobotServer.clients ) {
 					bos.send_udp(client.getInetAddress().getHostName(), VideoDecodeThread.PORT);
 				}
-				Log.i(TAG, "sent frame");
+				//Log.i(TAG, "sent frame");
 			} catch (Exception e) {
 				Log.e(TAG, e.toString());
 			};

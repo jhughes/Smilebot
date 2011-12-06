@@ -10,18 +10,15 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import android.app.Activity;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.widget.ImageView;
 
 public class RobotServer extends Activity {
 
+	protected static final String TAG = "RobotServer";
 	private SurfaceView mSurfaceView;
 	private SurfaceHolder holder;
 	private Camera mCamera;
@@ -35,17 +32,30 @@ public class RobotServer extends Activity {
 	Socket robot;
 	InputStream robotIn;
 	OutputStream robotOut;
+	
+	private AudioSendThread audioSend = null;
+	private AudioDecodeThread audioDecode = null;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.server);
 		init();
 	}
+	
+	public void onDestroy() {
+		if( audioSend != null ) audioSend.shutdown();
+		if( audioDecode != null ) audioDecode.shutdown();
+		super.onDestroy();
+	}
 
 	public void init() {
 		initHolder();
 		//connectToRobot();
 		clientAcceptThread.start();
+		/* HACK HACK HACK */
+		//boolean isServer = true;
+		//audioSend = new AudioSendThread(isServer);
+		//audioDecode = new AudioDecodeThread();
 		//relayThread.start();
 	}
 
@@ -68,14 +78,20 @@ public class RobotServer extends Activity {
 		SurfaceHolderCallback callback = new SurfaceHolderCallback(holder);
 		holder.addCallback(callback);
 	}
-	
+
 	public Thread relayThread = new Thread() {
 		public void run() {
 			byte[] buffer = new byte[1024];
+			int readBytes = 0;
 			try {
-				for (InputStream in : ins) {
-					if (in.available() > 0) {
-						robotOut.write(in.read(buffer));
+				while (true) {
+					for (InputStream in : ins) {
+						// if (in.available() > 0) {
+		
+						readBytes = in.read(buffer);
+						Log.i(TAG, "Server relayed "+ readBytes);
+						robotOut.write(buffer, 0, readBytes);
+						// }
 					}
 				}
 			} catch (IOException e) {
@@ -87,7 +103,7 @@ public class RobotServer extends Activity {
 	public Thread clientAcceptThread = new Thread() {
 		public void run() {
 			try {
-				socket = new ServerSocket(5000);
+				socket = new ServerSocket(ModeSelect.port);
 				clients = new ArrayList<Socket>();
 				outs = new ArrayList<OutputStream>();
 				ins = new ArrayList<InputStream>();

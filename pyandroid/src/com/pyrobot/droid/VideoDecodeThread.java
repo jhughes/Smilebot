@@ -24,7 +24,7 @@ public class VideoDecodeThread extends Thread {
 		this.start();
 	}
 	
-	public void quit(){
+	public void shutdown(){
 		alive = false;
 	}
 	
@@ -42,6 +42,7 @@ public class VideoDecodeThread extends Thread {
 				msg.setData(b);
 				handler.sendMessage(msg);
 			}
+			s.close();
 		} catch (Exception e) {
 			Log.e(TAG, e.toString());
 		}

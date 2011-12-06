@@ -1,35 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
-    <FrameLayout 
-        android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
-        android:layout_gravity="center"
-        >
-        
 		<Button
-			android:layout_height="wrap_content"
-			android:layout_width="wrap_content"
-			android:id="@+id/moveUp"
-			android:text="UP"	
-			android:layout_gravity="top|center"
-			 />
-		<Button
-			android:layout_height="wrap_content"
-			android:layout_width="wrap_content"
+			android:layout_height="fill_parent"
+			android:layout_width="90px"
 			android:id="@+id/moveLeft"
 			android:text="LEFT"	
 			android:layout_gravity="left|center_vertical"
-			 />
-		<Button
-			android:layout_height="wrap_content"
-			android:layout_width="wrap_content"
-			android:id="@+id/moveRight"
-			android:text="RIGHT"	
-			android:layout_gravity="right|center_vertical"
 			 />
 	    <ImageView 
 	        android:layout_width="352px"
@@ -37,5 +17,11 @@
 	        android:id="@+id/cameraView"
 	        android:src="@drawable/logo2big"
 	        android:layout_gravity="center"/>
-    </FrameLayout>
+
+	    <Button
+	        android:id="@+id/moveRight"
+	        android:layout_width="90px"
+	        android:layout_height="fill_parent"
+	        android:text="RIGHT" />
+
 </LinearLayout>
