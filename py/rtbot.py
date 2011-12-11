@@ -16,7 +16,7 @@ COMMANDS = deque([])
 STOP_STATES = deque([])
 CONNECTIONS = []
 MIN_SONAR_DISTANCE = 20
-MAX_FORWARD_VELOCITY = 200
+MAX_FORWARD_VELOCITY = 500
 MAX_TURN_VELOCITY = 150
 
 
@@ -151,9 +151,9 @@ class Rtbot(Create):
           return 'wheel_drop'
 
     # sonar
-    if 'sonar' in conditions and self.sensors.data['user-analog-input'] < conditions['sonar']:
-      print 'Sonar {0} {1}'.format(self.sensors.data['user-analog-input'], conditions['sonar'])
-      return 'sonar'
+    #if 'sonar' in conditions and self.sensors.data['user-analog-input'] < conditions['sonar']:
+    #  print 'Sonar {0} {1}'.format(self.sensors.data['user-analog-input'], conditions['sonar'])
+    #  return 'sonar'
 
     # distance traveled
     if 'distance' in conditions and self.distance_traveled >= conditions['distance']:
@@ -184,6 +184,12 @@ class Rtbot(Create):
       return self.stop_state
 
   def should_keep_backing_up(self):
+
+    # wheel drop
+    for wheel_drop in self.wheel_drops:
+      if self.sensors.data[wheel_drop]:
+        return False
+
     # bumps
     for bump in self.bumps:
       if self.sensors.data[bump]:
