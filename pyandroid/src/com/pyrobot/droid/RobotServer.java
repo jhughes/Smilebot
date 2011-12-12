@@ -24,15 +24,14 @@ public class RobotServer extends Activity {
 	private Camera mCamera;
 	private VideoDecodeThread vdt;
 
-	ServerSocket socket;
 	public static ArrayList<Socket> clients;
-	ArrayList<InputStream> ins;
-	ArrayList<OutputStream> outs;
 
-	Socket robot;
+	Socket robot = null;
 	InputStream robotIn;
-	OutputStream robotOut;
-	
+	OutputStream robotOut;		
+	ServerSocket socket;
+
+
 	private AudioSendThread audioSend = null;
 	private AudioDecodeThread audioDecode = null;
 	private Object audioLock = new Object();
@@ -42,22 +41,26 @@ public class RobotServer extends Activity {
 		setContentView(R.layout.server);
 		init();
 	}
-	
+
 	public void onDestroy() {
-		if( audioSend != null ) audioSend.shutdown();
-		if( audioDecode != null ) audioDecode.shutdown();
+		if (audioSend != null)
+			audioSend.shutdown();
+		if (audioDecode != null)
+			audioDecode.shutdown();
+		relayThread.destroy();
+		clientAcceptThread.destroy();
 		super.onDestroy();
 	}
 
 	public void init() {
-		initHolder();
+		// initHolder();
 		connectToRobot();
 		clientAcceptThread.start();
 		/* HACK HACK HACK */
-		boolean isServer = true;
-		audioSend = new AudioSendThread(isServer);
-		audioDecode = new AudioDecodeThread();
-		audioDecode.setSendThread(audioSend);
+		// boolean isServer = true;
+		// audioSend = new AudioSendThread(isServer);
+		// audioDecode = new AudioDecodeThread();
+		// audioDecode.setSendThread(audioSend);
 		relayThread.start();
 	}
 
@@ -82,39 +85,83 @@ public class RobotServer extends Activity {
 	}
 
 	public Thread relayThread = new Thread() {
+		private boolean alive;
+
+		@Override 
+		public void destroy() {
+			alive = false;
+		}
+		
 		public void run() {
+			alive = true;
 			byte[] buffer = new byte[1024];
 			int readBytes = 0;
-			try {
-				while (true) {
-					for (InputStream in : ins) {
-						// if (in.available() > 0) {
-		
-						readBytes = in.read(buffer);
-						Log.i(TAG, "Server relayed "+ readBytes);
-						robotOut.write(buffer, 0, readBytes);
-						// }
+			while (alive) {
+				for (Socket client : clients) {
+					try {
+						if (client.isConnected()) {
+							InputStream in = client.getInputStream();
+							readBytes = in.read(buffer);
+							if (readBytes < 0) {
+								Log.i(TAG, "Client removed");
+								client.close();
+								clients.remove(client);
+								continue;
+							}
+							Log.i(TAG, "Server relayed " + readBytes);
+							robotOut.write(buffer, 0, readBytes);
+							robotOut.flush();
+						} else {
+							Log.i(TAG, "Client removed");
+							client.close();
+							clients.remove(client);
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+						Log.i(TAG, "Exception: Client removed");
+						Log.e(TAG, e.toString());
+						clients.remove(client);
+						try {
+							client.close();
+						} catch (Exception e2) {
+						}
+						e.printStackTrace();
 					}
 				}
-			} catch (IOException e) {
-				e.printStackTrace();
+			}
+
+			if (robot != null) {
+				try {
+					robotOut.flush();
+					robotOut.close();
+					robot.close();
+					for (Socket client : clients) {
+						client.close();
+					}
+				} catch (Exception gofuckyourself) {
+				}
 			}
 		}
 	};
 
 	public Thread clientAcceptThread = new Thread() {
+		private boolean alive; 
+		
+		@Override
+		public void destroy() {
+			alive = false;
+		}
+		
 		public void run() {
+			alive = true;
 			try {
 				socket = new ServerSocket(ModeSelect.port);
 				clients = new ArrayList<Socket>();
-				outs = new ArrayList<OutputStream>();
-				ins = new ArrayList<InputStream>();
-				while (true) {
+				while (alive) {
 					Socket client = socket.accept();
 					clients.add(client);
-					outs.add(client.getOutputStream());
-					ins.add(client.getInputStream());
 				}
+				socket.close();
 			} catch (SocketException e) {
 				e.printStackTrace();
 			} catch (IOException e) {

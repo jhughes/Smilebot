@@ -5,40 +5,6 @@
     android:layout_height="fill_parent"
     >
 
-		<Button
-			android:layout_height="wrap_content"
-			android:layout_width="wrap_content"
-			android:id="@+id/kill"
-			android:text="KILL"
-			android:gravity="center_horizontal"
-			 />
-	 <RelativeLayout
-    	android:layout_width="fill_parent"
-    	android:layout_height="wrap_content"
-    	>
-		<EditText
-    		android:id="@+id/ip_edit"
-    		android:layout_width="150px"
-    		android:layout_height="wrap_content"
-    		android:layout_alignParentLeft="true"
-    		android:text="192.168.1.14"
-    		/>
-		<EditText
-    		android:id="@+id/port_edit"
-    		android:layout_width="75px"
-    		android:layout_height="wrap_content"
-    		android:layout_toRightOf="@id/ip_edit"
-    		android:text="5000"
-    		/>
-		<Button
-			android:layout_height="wrap_content"
-			android:layout_width="wrap_content"
-			android:id="@+id/connect"
-			android:text="connect"
-			android:layout_toRightOf="@id/port_edit"
-			/>
-	 </RelativeLayout>
-	 
 <Button
 	android:layout_height="wrap_content"
 	android:layout_width="wrap_content"

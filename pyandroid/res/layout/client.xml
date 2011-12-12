@@ -1,27 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    >
-		<Button
+    android:orientation="horizontal" >
+
+    <FrameLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="horizontal" >
+
+        <!--
+            Button
 			android:layout_height="fill_parent"
 			android:layout_width="90px"
 			android:id="@+id/moveLeft"
 			android:text="LEFT"	
 			android:layout_gravity="left|center_vertical"
-			 />
-	    <ImageView 
-	        android:layout_width="352px"
-	        android:layout_height="288px"
-	        android:id="@+id/cameraView"
-	        android:src="@drawable/logo2big"
-	        android:layout_gravity="center"/>
+			 /
+        -->
 
-	    <Button
+        <com.pyrobot.droid.ClientSurface
+            android:id="@+id/surface"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="horizontal" />
+
+        <ImageView
+            android:id="@+id/cameraView"
+            android:layout_width="352px"
+            android:layout_height="288px"
+            android:layout_gravity="center"
+            android:src="@drawable/logo2big" />
+
+        <!--
+              Button
 	        android:id="@+id/moveRight"
 	        android:layout_width="90px"
 	        android:layout_height="fill_parent"
-	        android:text="RIGHT" />
+			android:layout_gravity="right|center_vertical"
+	        android:text="RIGHT" /
+        -->
+    </FrameLayout>
 
 </LinearLayout>

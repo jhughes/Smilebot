@@ -30,20 +30,24 @@ public class MainMenu extends Activity {
 		super.onCreate(savedInstanceState);		
 		this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 		setContentView(R.layout.main);
-
+		robotHostName = ModeSelect.hostname;
+		robotHostPort = ModeSelect.port;
+		initializeButtons();
+		/*
 		Button connectButton = (Button) findViewById(R.id.connect);
 		connectButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
             	EditText ip_view = (EditText) findViewById(R.id.ip_edit);
         		EditText port_view = (EditText) findViewById(R.id.port_edit);
         		
-    			robotHostName = ip_view.getText().toString();
-    			robotHostPort = Integer.parseInt(port_view.getText().toString()); 
+    			robotHostName = ModeSelect.hostname;//ip_view.getText().toString();
+    			robotHostPort = ModeSelect.port;//Integer.parseInt(port_view.getText().toString()); 
 
         		initializeButtons();
         		//startHeartbeat();
             }
         });
+        */
 	
 	}
 
@@ -127,17 +131,6 @@ public class MainMenu extends Activity {
 				return false;
 			}
 		});
-		Button killButton = (Button) findViewById(R.id.kill);
-		killButton.setOnTouchListener(new OnTouchListener() {
-			
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				if (event.getAction() == MotionEvent.ACTION_UP) {
-					kill();
-				}
-				return false;
-			}
-		});	
 	}
 	
 	public void kill() {
