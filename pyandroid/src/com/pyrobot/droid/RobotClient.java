@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,6 +16,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -33,7 +37,6 @@ public class RobotClient extends Activity {
 	private AudioSendThread audioSend = null;
 	private Object lock = new Object();
 
-
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -41,25 +44,71 @@ public class RobotClient extends Activity {
 		init();
 	}
 
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.robot_client_menu, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		Toast.makeText(getApplicationContext(),
+				"Performance crashed, switching to failsafe mission",
+				Toast.LENGTH_SHORT).show();
+		setContentView(R.layout.main);
+		initializeButtons();
+		// Intent intent = new Intent(RobotClient.this, MainMenu.class);
+		// startActivity(intent);
+		return true;
+	}
+
 	public void onDestroy() {
 		if (adt != null)
 			adt.shutdown();
 		if (audioSend != null)
 			audioSend.shutdown();
-		if ( vdt != null)
+		if (vdt != null)
 			vdt.shutdown();
+		if (server != null) {
+			try {
+				in.close();
+				out.close();
+				server.close();
+			} catch (Exception e) {
+			}
+		}
 		super.onDestroy();
 	}
 
 	public void init() {
-		initializeButtons();
+
+		ClientSurface cs = (ClientSurface) findViewById(R.id.surface);
+		cs.setHandler(surfaceHandler);
+
+		// initializeButtons();
 		connectToServer();
-		vdt = new VideoDecodeThread(handler);
-		adt = new AudioDecodeThread();
-		audioSend = new AudioSendThread();
+		// vdt = new VideoDecodeThread(pictureHandler);
+		// adt = new AudioDecodeThread();
+		// audioSend = new AudioSendThread();
 	}
 
-	final Handler handler = new Handler() {
+	final Handler surfaceHandler = new Handler() {
+		public void handleMessage(Message msg) {
+			Bundle b = msg.getData();
+			if (b.getBoolean(ClientSurface.STOPPED)) {
+				Log.i(TAG, "Stopped");
+				sendCommand("stop");
+			} else {
+				float leftYRatio = b.getFloat(ClientSurface.LEFT_Y_RATIO_KEY);
+				float rightYRatio = b.getFloat(ClientSurface.RIGHT_Y_RATIO_KEY);
+				sendMovementCommand(leftYRatio, rightYRatio);
+				Log.i(TAG, "View reported: " + leftYRatio + " - " + rightYRatio);
+			}
+		}
+	};
+
+	final Handler pictureHandler = new Handler() {
 		public void handleMessage(Message msg) {
 			Bundle b = msg.getData();
 			byte[] packet = b.getByteArray("packet");
@@ -90,11 +139,13 @@ public class RobotClient extends Activity {
 	// Button listeners below
 
 	private void initializeButtons() {
-		ImageView preview = (ImageView) findViewById(R.id.cameraView);
-		preview.setOnTouchListener(new OnTouchListener() {
+		// ImageView preview = (ImageView) findViewById(R.id.cameraView);
+		// preview.setOnTouchListener(new OnTouchListener() {
+		Button moveForwardButton = (Button) findViewById(R.id.moveForward);
+		moveForwardButton.setOnTouchListener(new OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
-				Log.i(TAG, Integer.toString(event.getAction()));
+				// Log.i(TAG, Integer.toString(event.getAction()));
 				if (event.getAction() == MotionEvent.ACTION_DOWN) {
 					moveForward();
 					// Toast.makeText(getApplicationContext(), "DOWN",
@@ -137,6 +188,11 @@ public class RobotClient extends Activity {
 		});
 	}
 
+	private void sendMovementCommand(float leftY, float rightY) {
+		Instructions instructions = new Instructions(leftY, rightY);
+		sendMessage(instructions.toString());
+	}
+
 	private void sendCommand(String command) {
 		Instructions instructions = new Instructions();
 		instructions.setCommand('"' + command + '"');
@@ -172,7 +228,7 @@ public class RobotClient extends Activity {
 	private void kill() {
 		sendMessage("shutdown");
 	}
-	
+
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
@@ -182,7 +238,7 @@ public class RobotClient extends Activity {
 			return super.onKeyDown(keyCode, event);
 		}
 	}
-	
+
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
