@@ -27,6 +27,7 @@ class Robot_Server(threading.Thread):
     print 'Connected by', addr
     while 1:
         data = conn.recv(1024)
+        print data
         if not data: break
         COMMANDS.append(data)
     conn.close()
