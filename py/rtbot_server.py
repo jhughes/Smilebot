@@ -23,11 +23,19 @@ class Robot_Server(threading.Thread):
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind((HOST, PORT))
     s.listen(1)
-    conn, addr = s.accept()
-    print 'Connected by', addr
     while 1:
-        data = conn.recv(1024)
-        print data
-        if not data: break
-        COMMANDS.append(data)
-    conn.close()
+      print "waiting for connection"
+      conn, addr = s.accept()
+      print 'Connected by', addr
+      while 1:
+        try:
+          data = conn.recv(1024)
+          if not data: break
+          print data
+          print eval(data)
+          COMMANDS.append(data)
+        except Exception as exception:
+          print exception
+      COMMANDS.append("{'command':'stop'}")
+      print "connection broke"
+      conn.close()

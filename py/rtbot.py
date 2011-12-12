@@ -15,8 +15,8 @@ PORT = 0
 COMMANDS = deque([])
 STOP_STATES = deque([])
 CONNECTIONS = []
-MIN_SONAR_DISTANCE = 20
-MAX_FORWARD_VELOCITY = 500
+MIN_SONAR_DISTANCE = 25
+MAX_FORWARD_VELOCITY = 300
 MAX_TURN_VELOCITY = 150
 
 
@@ -61,14 +61,14 @@ class Rtbot(Create):
       conditions = {}
       if cmd == 'forward':
         conditions['velocity'] = min(command_dict.get('velocity', MAX_FORWARD_VELOCITY), MAX_FORWARD_VELOCITY)
-        conditions['radius'] = RADIUS_STRAIGHT
+        conditions['radius'] = command_dict.get('radius', RADIUS_STRAIGHT)
         conditions['sonar'] = max(command_dict.get('sonar', MIN_SONAR_DISTANCE), MIN_SONAR_DISTANCE)
       elif cmd == 'left':
         conditions['velocity'] = min(command_dict.get('velocity', MAX_TURN_VELOCITY), MAX_TURN_VELOCITY)
-        conditions['radius'] = RADIUS_TURN_IN_PLACE_CCW
+        conditions['radius'] = command_dict.get('radius', RADIUS_TURN_IN_PLACE_CCW)
       elif cmd == 'right':
         conditions['velocity'] = min(command_dict.get('velocity', MAX_TURN_VELOCITY), MAX_TURN_VELOCITY)
-        conditions['radius'] = RADIUS_TURN_IN_PLACE_CW
+        conditions['radius'] = command_dict.get('radius', RADIUS_TURN_IN_PLACE_CW)
       elif cmd == 'stop':
         conditions['velocity'] = 0
       else:
@@ -120,7 +120,8 @@ class Rtbot(Create):
       stop_reason = 'exception'
       print exception
     finally:
-      self.Stop()
+      if stop_reason != 'interrupt':
+        self.Stop()
       self.stop_state = { "stop_reason": stop_reason, "distance_traveled":self.distance_traveled, "degrees_rotated": self.degrees_rotated, "sonar": self.sensors.data['user-analog-input'],"velocity": velocity, "radius": radius }
       return self.stop_state
 
@@ -151,9 +152,9 @@ class Rtbot(Create):
           return 'wheel_drop'
 
     # sonar
-    #if 'sonar' in conditions and self.sensors.data['user-analog-input'] < conditions['sonar']:
-    #  print 'Sonar {0} {1}'.format(self.sensors.data['user-analog-input'], conditions['sonar'])
-    #  return 'sonar'
+    if 'sonar' in conditions and self.sensors.data['user-analog-input'] < conditions['sonar']:
+      print 'Sonar {0} {1}'.format(self.sensors.data['user-analog-input'], conditions['sonar'])
+      return 'sonar'
 
     # distance traveled
     if 'distance' in conditions and self.distance_traveled >= conditions['distance']:
