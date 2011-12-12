@@ -53,12 +53,12 @@ public class RobotServer extends Activity {
 	}
 
 	public void init() {
-		// initHolder();
+		initHolder();
 		connectToRobot();
 		clientAcceptThread.start();
 		/* HACK HACK HACK */
-		// boolean isServer = true;
-		// audioSend = new AudioSendThread(isServer);
+		boolean isServer = true;
+		audioSend = new AudioSendThread(isServer);
 		// audioDecode = new AudioDecodeThread();
 		// audioDecode.setSendThread(audioSend);
 		relayThread.start();
@@ -106,6 +106,7 @@ public class RobotServer extends Activity {
 								Log.i(TAG, "Client removed");
 								client.close();
 								clients.remove(client);
+								robotOut.write("{'command':'stop'}".getBytes());
 								continue;
 							}
 							Log.i(TAG, "Server relayed " + readBytes);
@@ -115,6 +116,7 @@ public class RobotServer extends Activity {
 							Log.i(TAG, "Client removed");
 							client.close();
 							clients.remove(client);
+							robotOut.write("{'command':'stop'}".getBytes());
 						}
 					} catch (IOException e) {
 						e.printStackTrace();
@@ -123,8 +125,10 @@ public class RobotServer extends Activity {
 						clients.remove(client);
 						try {
 							client.close();
+							robotOut.write("{'command':'stop'}".getBytes());
 						} catch (Exception e2) {
 						}
+						
 						e.printStackTrace();
 					}
 				}
