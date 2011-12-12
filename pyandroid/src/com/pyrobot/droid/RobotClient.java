@@ -87,17 +87,34 @@ public class RobotClient extends Activity {
 	}
 
 	public void init() {
-
-		ClientSurface cs = (ClientSurface) findViewById(R.id.surface);
-		cs.setHandler(surfaceHandler);
+		connectToServer();
+		Joystick js = (Joystick) findViewById(R.id.joystick);
+		js.setHandler(joystickHandler);
+//		ClientSurface cs = (ClientSurface) findViewById(R.id.surface);
+//		cs.setHandler(surfaceHandler);
 
 		// initializeButtons();
-		connectToServer();
 		vdt = new VideoDecodeThread(pictureHandler);
 		adt = new AudioDecodeThread();
 		// audioSend = new AudioSendThread();
 	}
-
+	
+	final Handler joystickHandler = new Handler() {
+		public void handleMessage(Message msg) {
+			Bundle b = msg.getData();
+			if (b.getBoolean(Joystick.STOPPED)) {
+				Log.i(TAG, "Stopped");
+				sendCommand("stop");
+			} else {
+				float x = b.getFloat(Joystick.X);
+				float y = b.getFloat(Joystick.Y);
+				sendMovementCommand(x, y);
+				Log.i(TAG, "View reported: " + y + " - " + y);
+			}
+		}
+	};
+	
+	/*
 	final Handler surfaceHandler = new Handler() {
 		public void handleMessage(Message msg) {
 			Bundle b = msg.getData();
@@ -112,6 +129,7 @@ public class RobotClient extends Activity {
 			}
 		}
 	};
+	*/
 
 	final Handler pictureHandler = new Handler() {
 		public void handleMessage(Message msg) {

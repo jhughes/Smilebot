@@ -21,11 +21,11 @@ public final class R {
         public static final int cameraView=0x7f060001;
         public static final int crash=0x7f06000a;
         public static final int ip_edit=0x7f060005;
+        public static final int joystick=0x7f060000;
         public static final int moveForward=0x7f060002;
         public static final int moveLeft=0x7f060003;
         public static final int moveRight=0x7f060004;
         public static final int port_edit=0x7f060006;
-        public static final int surface=0x7f060000;
         public static final int video_surface_view=0x7f060009;
     }
     public static final class layout {
