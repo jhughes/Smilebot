@@ -56,6 +56,10 @@ public class RobotClient extends Activity {
 		Toast.makeText(getApplicationContext(),
 				"Performance crashed, switching to failsafe mission",
 				Toast.LENGTH_SHORT).show();
+		vdt.shutdown();
+		vdt = null;
+		adt.shutdown();
+		adt = null;
 		setContentView(R.layout.main);
 		initializeButtons();
 		// Intent intent = new Intent(RobotClient.this, MainMenu.class);
@@ -68,8 +72,9 @@ public class RobotClient extends Activity {
 			adt.shutdown();
 		if (audioSend != null)
 			audioSend.shutdown();
-		if (vdt != null)
+		if (vdt != null) {
 			vdt.shutdown();
+		}
 		if (server != null) {
 			try {
 				in.close();
@@ -88,8 +93,8 @@ public class RobotClient extends Activity {
 
 		// initializeButtons();
 		connectToServer();
-		// vdt = new VideoDecodeThread(pictureHandler);
-		// adt = new AudioDecodeThread();
+		vdt = new VideoDecodeThread(pictureHandler);
+		adt = new AudioDecodeThread();
 		// audioSend = new AudioSendThread();
 	}
 
@@ -116,8 +121,10 @@ public class RobotClient extends Activity {
 			Bitmap bm = BitmapFactory.decodeByteArray(packet, 12,
 					packet.length - 12);
 			synchronized (lock) {
-				v.setImageBitmap(bm);
-				v.invalidate();
+				if( vdt != null) {
+					v.setImageBitmap(bm);
+					v.invalidate();
+				}
 			}
 		}
 	};
@@ -232,7 +239,7 @@ public class RobotClient extends Activity {
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-			audioSend.sendAudio();
+			if(adt!=null) audioSend.sendAudio();
 			return true;
 		} else {
 			return super.onKeyDown(keyCode, event);
@@ -242,7 +249,7 @@ public class RobotClient extends Activity {
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-			audioSend.stopSendingAudio();
+			if(adt!=null) audioSend.stopSendingAudio();
 			return true;
 		} else {
 			return super.onKeyDown(keyCode, event);
