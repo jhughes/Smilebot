@@ -15,7 +15,7 @@ PORT = 0
 COMMANDS = deque([])
 STOP_STATES = deque([])
 CONNECTIONS = []
-MIN_SONAR_DISTANCE = 25
+MIN_SONAR_DISTANCE = 28
 MAX_FORWARD_VELOCITY = 300
 MAX_TURN_VELOCITY = 150
 
@@ -152,6 +152,7 @@ class Rtbot(Create):
           return 'wheel_drop'
 
     # sonar
+    #print self.sensors.data['user-analog-input']
     if 'sonar' in conditions and self.sensors.data['user-analog-input'] < conditions['sonar']:
       print 'Sonar {0} {1}'.format(self.sensors.data['user-analog-input'], conditions['sonar'])
       return 'sonar'
