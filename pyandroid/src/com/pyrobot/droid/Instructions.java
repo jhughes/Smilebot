@@ -60,29 +60,57 @@ public class Instructions {
 	
 	int maxVelocity = 300;
 	int minVelocity = 50;
-	int maxRadius = 32768;
-	int minRadius = 15;
-	int turnThreshold = 5;
 	
-	public void setInstructions(double left, double right){
-		left = 1 - left;
-		right = 1 - right;
-		double difference = (Math.abs(left-right));
-//		int radius; = minRadius + (int) (maxRadius - (difference) * maxRadius);
-		int radius = (int) (minRadius + maxRadius * Math.pow(difference - 1, 4));
-		if(right > left)
-			radius = -radius;
-		int velocity = minVelocity + (int)(Math.max(left, right) * (maxVelocity - minVelocity));
-		if(radius < turnThreshold && radius > 0) {
-			instructions.put("command", "\"left\"");
+	public void setInstructions(double x, double y){
+		double angle = Math.atan2(y, x);
+		if( angle < 0 )
+			angle += 2 * Math.PI;
+		int radius;
+		if(angle < 0.196349541)
+		{
+			radius = -20;
+			instructions.put("command", "'right'");
 		}
-		else if(radius > -turnThreshold && radius < 0) {
-			instructions.put("command", "\"right\"");
+		else if(angle < 0.589048623){
+			radius = -300;
+			instructions.put("command", "'forward'");
+		}			
+		else if(angle < 0.981747704){
+			radius = -1000;
+			instructions.put("command", "'forward'");
 		}
-		else {
-			instructions.put("command", "\"forward\"");
+		else if(angle < 1.37444679){
+			radius = -5000;
+			instructions.put("command", "'forward'");
+		}
+		else if(angle < 1.76714587){
+			radius = 32768;
+			instructions.put("command", "'forward'");
+		}
+		else if(angle < 2.15984495){
+			radius = 5000;
+			instructions.put("command", "'forward'");
+		}
+		else if(angle < 2.55254403){
+			radius = 1000;
+			instructions.put("command", "'forward'");
+		}
+		else if(angle < 2.94524311){
+			radius = 300;
+			instructions.put("command", "'forward'");
+		}
+		else if(angle < 4.71238898){
+			radius = 20;
+			instructions.put("command", "'left'");
+		}
+		else{
+			radius = -20;
+			instructions.put("command", "'right'");
 		}
 		instructions.put("radius", Integer.toString(radius));
-		instructions.put("velocity", Integer.toString(velocity));
+		
+		double distance = Math.sqrt(x*x + y*y);
+		int velocity = (int) (minVelocity + (distance * (maxVelocity - minVelocity)));
+		instructions.put("velocity", Integer.toString(velocity));	
 	}
 }
