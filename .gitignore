@@ -1,3 +1,4 @@
 *.swp
 pyandroid/bin
 pyandroid/gen
+*~
